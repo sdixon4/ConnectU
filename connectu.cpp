@@ -1,3 +1,4 @@
+// Lab 0 enviornment setup test - Shelby
 /*
  * PROJECT: CONNECT-U (Starter Code)
  * Course: ECE367L Data Structures & Algorithms
@@ -5,6 +6,7 @@
  * SAFETY UPDATE:
  * The saveData() function call in main() is currently COMMENTED OUT.
  * This prevents you from accidentally wiping your 'posts.csv' file
+ * This is a comment for test commit 
  * if your Lab 1 implementation is incomplete.
  * * ONLY uncomment saveData() after you have verified Lab 1 works!
  */
