@@ -1,14 +1,19 @@
-// Lab 0 enviornment setup test - Shelby
 /*
  * PROJECT: CONNECT-U (Starter Code)
  * Course: ECE367L Data Structures & Algorithms
- * 
- * SAFETY UPDATE:
- * The saveData() function call in main() is currently COMMENTED OUT.
- * This prevents you from accidentally wiping your 'posts.csv' file
- * This is a comment for test commit 
- * if your Lab 1 implementation is incomplete.
- * * ONLY uncomment saveData() after you have verified Lab 1 works!
+ *
+ * LAB 1: Timeline Linked List
+ * - Implement a linked-list-based Timeline using Post nodes
+ * - addPost(): insert new posts at the FRONT of the list in O(1)
+ * - printTimeline(): traverse and print posts from newest to oldest
+ *
+ * SAFETY NOTE:
+ * The saveData() function call is currently COMMENTED OUT in the main menu.
+ * This prevents accidentally overwriting your CSV files while Lab 1 is incomplete.
+ * ONLY uncomment saveData() after you verify:
+ *   1) You can view existing posts
+ *   2) You can create a new post
+ *   3) The new post appears at the top of the timeline
  */
 
 #include <iostream>
@@ -33,14 +38,14 @@ struct Post {
     string content;
     int likes;
     long timestamp;
-    Post* next; 
+    Post* next;
 
-    Post(int pid, int uid, string txt, int lk, long time) 
+    Post(int pid, int uid, string txt, int lk, long time)
         : postId(pid), userId(uid), content(txt), likes(lk), timestamp(time), next(nullptr) {}
-        
+
     // TODO: LAB 3 - Implement Scoring Logic
     double getScore() {
-        return 0.0; 
+        return 0.0;
     }
 };
 
@@ -52,18 +57,26 @@ public:
 
     // Task: Add a new post to the FRONT of the list (O(1))
     void addPost(int pid, int uid, string content, int likes, long time) {
-        // TODO: LAB 1
-
-
+        // LAB 1: O(1) push-front into singly linked list
+        Post* newPost = new Post(pid, uid, content, likes, time);
+        newPost->next = head;
+        head = newPost;
     }
 
     void printTimeline() {
         Post* current = head;
-        if (!current) { cout << "  (No posts yet)" << endl; return; }
-        
-        // Task: Traverse the linked list and print content
-        // TODO: LAB 1
+        if (!current) {
+            cout << "  (No posts yet)" << endl;
+            return;
+        }
 
+        // LAB 1: Traverse and print newest->oldest
+        while (current != nullptr) {
+            cout << "  > [ID: " << current->postId << "] "
+                 << current->content
+                 << " (" << current->likes << " likes)" << endl;
+            current = current->next;
+        }
     }
 };
 
@@ -83,7 +96,7 @@ public:
     BSTNode* root;
     FriendBST() : root(nullptr) {}
 
-    BSTNode* insert(BSTNode* node, User* u) ;
+    BSTNode* insert(BSTNode* node, User* u);
 
     void printInOrder(BSTNode* node);
 
@@ -100,12 +113,12 @@ public:
     int userId;
     string username;
     int techScore, artScore, sportScore;
-    
+
     Timeline timeline;       // Lab 1
     vector<User*> friends;   // Graph
     FriendBST friendTree;    // Lab 4
 
-    User(int id, string name, int t, int a, int s) 
+    User(int id, string name, int t, int a, int s)
         : userId(id), username(name), techScore(t), artScore(a), sportScore(s) {}
 
     void addPost(int pid, string content, int likes, long time) {
@@ -113,10 +126,10 @@ public:
     }
 
     void addFriend(User* u) {
-        friends.push_back(u);       
-        friendTree.addFriend(u);    
+        friends.push_back(u);
+        friendTree.addFriend(u);
     }
-    
+
     vector<User*> getFriendsList() { return friends; }
 };
 
@@ -132,7 +145,7 @@ void FriendBST::printInOrder(BSTNode* node) {
 // TODO: LAB 3 - Max Heap
 class FeedHeap {
 private:
-    Post* heap[1000]; 
+    Post* heap[1000];
     int size;
 
     void heapifyDown(int index) { /* TODO: LAB 3 */ }
@@ -157,12 +170,12 @@ struct HashNode {
 
 class UserMap {
 private:
-    static const int TABLE_SIZE = 10007; 
+    static const int TABLE_SIZE = 10007;
     HashNode** table;
 
     unsigned long hashFunction(string key) {
         // TODO: LAB 2
-        return 0; 
+        return 0;
     }
 
 public:
@@ -175,7 +188,7 @@ public:
 
     User* get(string key) {
         // --- TEMPORARY FALLBACK FOR LAB 1 ---
-        for(User* u : allUsers) {
+        for (User* u : allUsers) {
             if (u->username == key) return u;
         }
         // TODO: LAB 2 - REPLACE ABOVE WITH HASH LOOKUP
@@ -193,13 +206,13 @@ vector<string> split(string s) {
     vector<string> tokens;
     string token;
     bool inQuotes = false;
-    
+
     for (char c : s) {
         if (c == '"') {
             inQuotes = !inQuotes; // Toggle quote state
-            continue; // Skip the quote character itself
+            continue;             // Skip the quote character itself
         }
-        
+
         if (c == ',' && !inQuotes) {
             // Found a delimiter outside of quotes -> New Token
             tokens.push_back(token);
@@ -212,7 +225,6 @@ vector<string> split(string s) {
     tokens.push_back(token); // Add last token
     return tokens;
 }
-
 
 int GLOBAL_POST_ID_COUNTER = 1;
 
@@ -229,13 +241,13 @@ Post* findPostById(int id) {
 
 void createNewPost(User* author, string content) {
     int postId = GLOBAL_POST_ID_COUNTER++;
-    long timestamp = time(0); 
+    long timestamp = time(0);
     author->addPost(postId, content, 0, timestamp);
     cout << "\n[SUCCESS] Post saved to timeline." << endl;
 }
 
 void registerNewUser(string username, int tech, int art, int sport) {
-    int newId = allUsers.size() + 1; 
+    int newId = (int)allUsers.size() + 1;
     User* newUser = new User(newId, username, tech, art, sport);
     allUsers.push_back(newUser);
     userMap.put(username, newUser);
@@ -255,47 +267,53 @@ void recommendFriends(User* startUser) {
 }
 
 // ==========================================
-// FILE I/O 
+// FILE I/O
 // ==========================================
 
 void loadData() {
     cout << "Loading data from CSV files..." << endl;
+
     ifstream userFile("users.csv");
     string line;
+
     if (userFile.is_open()) {
-        getline(userFile, line); 
+        getline(userFile, line);
         while (getline(userFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 5) continue;
             User* newUser = new User(stoi(row[0]), row[1], stoi(row[2]), stoi(row[3]), stoi(row[4]));
             allUsers.push_back(newUser);
-            userMap.put(row[1], newUser); 
+            userMap.put(row[1], newUser);
         }
         userFile.close();
     }
+
     ifstream relFile("relations.csv");
     if (relFile.is_open()) {
-        getline(relFile, line); 
+        getline(relFile, line);
         while (getline(relFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 2) continue;
-            int u1 = stoi(row[0]); int u2 = stoi(row[1]);
-            if (u1 <= allUsers.size() && u2 <= allUsers.size()) {
-                allUsers[u1-1]->addFriend(allUsers[u2-1]);
-                allUsers[u2-1]->addFriend(allUsers[u1-1]);
+            int u1 = stoi(row[0]);
+            int u2 = stoi(row[1]);
+            if (u1 <= (int)allUsers.size() && u2 <= (int)allUsers.size()) {
+                allUsers[u1 - 1]->addFriend(allUsers[u2 - 1]);
+                allUsers[u2 - 1]->addFriend(allUsers[u1 - 1]);
             }
         }
         relFile.close();
     }
+
     ifstream postFile("posts.csv");
     if (postFile.is_open()) {
-        getline(postFile, line); 
+        getline(postFile, line);
         while (getline(postFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 5) continue;
-            int pid = stoi(row[0]); int uid = stoi(row[1]);
-            if (uid <= allUsers.size()) {
-                allUsers[uid-1]->addPost(pid, row[2], stoi(row[3]), stol(row[4])); 
+            int pid = stoi(row[0]);
+            int uid = stoi(row[1]);
+            if (uid <= (int)allUsers.size()) {
+                allUsers[uid - 1]->addPost(pid, row[2], stoi(row[3]), stol(row[4]));
                 if (pid >= GLOBAL_POST_ID_COUNTER) GLOBAL_POST_ID_COUNTER = pid + 1;
             }
         }
@@ -311,10 +329,12 @@ void saveData() {
     }
 
     cout << "Saving data..." << endl;
+
     ofstream userFile("users.csv");
     userFile << "user_id,username,tech_score,art_score,sport_score\n";
     for (User* u : allUsers) {
-        userFile << u->userId << "," << u->username << "," << u->techScore << "," << u->artScore << "," << u->sportScore << "\n";
+        userFile << u->userId << "," << u->username << ","
+                 << u->techScore << "," << u->artScore << "," << u->sportScore << "\n";
     }
     userFile.close();
 
@@ -333,16 +353,19 @@ void saveData() {
         vector<Post*> temp;
         Post* curr = u->timeline.head;
         while (curr) { temp.push_back(curr); curr = curr->next; }
-        for (int i = temp.size() - 1; i >= 0; i--) {
+
+        for (int i = (int)temp.size() - 1; i >= 0; i--) {
             Post* p = temp[i];
             string safeContent = p->content;
             if (safeContent.find(',') != string::npos) {
                 safeContent = "\"" + safeContent + "\"";
-            } 
-            postFile << p->postId << "," << p->userId << "," << safeContent << "," << p->likes << "," << p->timestamp << "\n";
+            }
+            postFile << p->postId << "," << p->userId << ","
+                     << safeContent << "," << p->likes << "," << p->timestamp << "\n";
         }
     }
     postFile.close();
+
     cout << "Done." << endl;
 }
 
@@ -351,11 +374,11 @@ void saveData() {
 // ==========================================
 
 void clearScreen() {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
 void showUserDashboard(User* currentUser) {
@@ -378,7 +401,7 @@ void showUserDashboard(User* currentUser) {
         }
         else if (choice == 2) {
             cout << "\nEnter post content: ";
-            cin.ignore(); 
+            cin.ignore();
             string content;
             getline(cin, content);
             createNewPost(currentUser, content);
@@ -387,32 +410,32 @@ void showUserDashboard(User* currentUser) {
             string friendName;
             cout << "Enter username to add: "; cin >> friendName;
             User* target = userMap.get(friendName);
-            if(target && target != currentUser) addFriendship(currentUser, target);
+            if (target && target != currentUser) addFriendship(currentUser, target);
             else cout << "Invalid user (or Hash Map not implemented)." << endl;
         }
         else if (choice == 4) {
             cout << "\n[ALGORITHMIC FEED]" << endl;
             FeedHeap feed;
             vector<User*> friends = currentUser->getFriendsList();
-            for(User* f : friends) {
+            for (User* f : friends) {
                 Post* p = f->timeline.head;
                 int limit = 0;
-                while(p != nullptr && limit < 5) {
+                while (p != nullptr && limit < 5) {
                     feed.push(p);
                     p = p->next;
                     limit++;
                 }
             }
             int count = 0;
-            while(!feed.isEmpty() && count < 10) {
+            while (!feed.isEmpty() && count < 10) {
                 Post* top = feed.popMax();
-                if(top)
-                    cout << "  > [ID: " << top->postId << "] [Score: " << (int)top->getScore() << "] @" 
-                         << allUsers[top->userId - 1]->username << ": " << top->content 
+                if (top)
+                    cout << "  > [ID: " << top->postId << "] [Score: " << (int)top->getScore() << "] @"
+                         << allUsers[top->userId - 1]->username << ": " << top->content
                          << " (" << top->likes << " likes)" << endl;
                 count++;
             }
-            if(count == 0) cout << "  No posts found." << endl;
+            if (count == 0) cout << "  No posts found." << endl;
             else {
                 cout << "\nDo you want to like a post? (y/n): ";
                 char resp; cin >> resp;
@@ -428,7 +451,7 @@ void showUserDashboard(User* currentUser) {
             currentUser->friendTree.printFriends();
         }
         else if (choice == 6) {
-             recommendFriends(currentUser);
+            recommendFriends(currentUser);
         }
         else if (choice == 7) {
             cout << "Logging out..." << endl;
@@ -452,7 +475,7 @@ void showMainMenu() {
             User* user = userMap.get(username);
             if (user) showUserDashboard(user);
             else cout << "User not found." << endl;
-        } 
+        }
         else if (choice == 2) {
             string username;
             int t, a, s;
@@ -463,15 +486,16 @@ void showMainMenu() {
         else if (choice == 3) {
             // SAFETY: Commented out to prevent data loss on initial run.
             // Students must uncomment this ONLY when Lab 1 is complete.
-            // saveData(); 
+            // saveData();
             cout << "Goodbye! " << endl;
         }
     }
 }
 
 int main() {
-    loadData(); 
+    loadData();
     clearScreen();
     showMainMenu();
     return 0;
 }
+
