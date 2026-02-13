@@ -25,6 +25,7 @@
 #include <set>
 #include <queue>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -81,6 +82,75 @@ public:
 };
 
 // Forward Declaration
+
+// Forward Declaration (needed because HashNode stores User*)
+class User;
+
+// TODO: LAB 2 - Hash Map
+struct HashNode {
+    string key;
+    User* value;
+    HashNode* next;
+    HashNode(string k, User* v) : key(k), value(v), next(nullptr) {}
+};
+
+class UserMap {
+private:
+    static const int TABLE_SIZE = 10007;
+    HashNode** table;
+
+    unsigned long hashFunction(string key) {
+        const unsigned long base = 31;
+        unsigned long hash = 0;
+        for (unsigned char c : key) {
+            hash = (hash * base + c) % TABLE_SIZE;
+        }
+        return hash;
+    }
+
+public:
+    UserMap() {
+        table = new HashNode*[TABLE_SIZE];
+        for (int i = 0; i < TABLE_SIZE; i++) table[i] = nullptr;
+    }
+
+    void put(string key, User* user) {
+        unsigned long idx = hashFunction(key);
+
+        if (table[idx] == nullptr) {
+            table[idx] = new HashNode(key, user);
+            return;
+        }
+
+
+
+        HashNode* curr = table[idx];
+        while (curr != nullptr) {
+            if (curr->key == key) {
+                curr->value = user;
+                return;
+            }
+            curr = curr->next;
+        }
+
+        HashNode* node = new HashNode(key, user);
+        node->next = table[idx];
+        table[idx] = node;
+    }
+
+    User* get(string key) {
+        unsigned long idx = hashFunction(key);
+        HashNode* curr = table[idx];
+
+        while (curr != nullptr) {
+            if (curr->key == key) return curr->value;
+            curr = curr->next;
+        }
+        return nullptr;
+    }
+};
+
+// Forward Declaration
 class User;
 
 // TODO: LAB 4 - Binary Search Tree
@@ -97,7 +167,6 @@ public:
     FriendBST() : root(nullptr) {}
 
     BSTNode* insert(BSTNode* node, User* u);
-
     void printInOrder(BSTNode* node);
 
     void addFriend(User* u) { root = insert(root, u); }
@@ -107,6 +176,7 @@ public:
         else printInOrder(root);
     }
 };
+
 
 class User {
 public:
@@ -160,41 +230,6 @@ public:
 
 vector<User*> allUsers;
 
-// TODO: LAB 2 - Hash Map
-struct HashNode {
-    string key;
-    User* value;
-    HashNode* next;
-    HashNode(string k, User* v) : key(k), value(v), next(nullptr) {}
-};
-
-class UserMap {
-private:
-    static const int TABLE_SIZE = 10007;
-    HashNode** table;
-
-    unsigned long hashFunction(string key) {
-        // TODO: LAB 2
-        return 0;
-    }
-
-public:
-    UserMap() {
-        table = new HashNode*[TABLE_SIZE];
-        for (int i = 0; i < TABLE_SIZE; i++) table[i] = nullptr;
-    }
-
-    void put(string key, User* user) { /* TODO: LAB 2 */ }
-
-    User* get(string key) {
-        // --- TEMPORARY FALLBACK FOR LAB 1 ---
-        for (User* u : allUsers) {
-            if (u->username == key) return u;
-        }
-        // TODO: LAB 2 - REPLACE ABOVE WITH HASH LOOKUP
-        return nullptr;
-    }
-};
 
 UserMap userMap;
 
@@ -459,6 +494,17 @@ void showUserDashboard(User* currentUser) {
     }
 }
 
+int readInt() {
+    int x;
+    while (!(cin >> x)) {
+        cin.clear(); // clear fail flag
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard bad input
+        cout << "Invalid input. Enter a number: ";
+    }
+    return x;
+}
+
+
 void showMainMenu() {
     int choice = 0;
     while (choice != 3) {
@@ -467,11 +513,14 @@ void showMainMenu() {
         cout << "2. Register" << endl;
         cout << "3. Exit & Save" << endl;
         cout << "Select >> ";
-        cin >> choice;
+
+        choice = readInt();
 
         if (choice == 1) {
             string username;
-            cout << "Username: "; cin >> username;
+            cout << "Username: ";
+            cin >> username;
+
             User* user = userMap.get(username);
             if (user) showUserDashboard(user);
             else cout << "User not found." << endl;
@@ -479,8 +528,15 @@ void showMainMenu() {
         else if (choice == 2) {
             string username;
             int t, a, s;
-            cout << "Username: "; cin >> username;
-            cout << "Tech/Art/Sport (1-10): "; cin >> t >> a >> s;
+
+            cout << "Username: ";
+            cin >> username;
+
+            cout << "Tech/Art/Sport (1-10): ";
+            t = readInt();
+            a = readInt();
+            s = readInt();
+
             registerNewUser(username, t, a, s);
         }
         else if (choice == 3) {
@@ -489,8 +545,12 @@ void showMainMenu() {
             // saveData();
             cout << "Goodbye! " << endl;
         }
+        else {
+            cout << "Invalid choice. Pick 1-3." << endl;
+        }
     }
 }
+
 
 int main() {
     loadData();
