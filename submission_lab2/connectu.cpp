@@ -46,11 +46,8 @@ struct Post {
 
     // TODO: LAB 3 - Implement Scoring Logic
     double getScore() {
-    long currentTime = time(nullptr);
-    double hoursOld = difftime(currentTime, timestamp) / 3600.0;
-    return (likes * 10) + (1000.0 / (hoursOld + 1));
-}
-
+        return 0.0;
+    }
 };
 
 // TODO: LAB 1 - Linked List
@@ -208,27 +205,11 @@ public:
 
 // BST Implementation
 BSTNode* FriendBST::insert(BSTNode* node, User* u) {
-    if (node == nullptr) {
-        return new BSTNode(u);
-    }
-
-    if (u->username < node->user->username) {
-        node->left = insert(node->left, u);
-    } else if (u->username > node->user->username) {
-        node->right = insert(node->right, u);
-    }
-
+    // TODO: LAB 4
     return node;
 }
-
 void FriendBST::printInOrder(BSTNode* node) {
-    if (node == nullptr) {
-        return;
-    }
-
-    printInOrder(node->left);
-    cout << "  - " << node->user->username << endl;
-    printInOrder(node->right);
+    // TODO: LAB 4
 }
 
 // TODO: LAB 3 - Max Heap
@@ -237,73 +218,13 @@ private:
     Post* heap[1000];
     int size;
 
-    void heapifyDown(int index) {
-        while (true) {
-            int left = 2 * index + 1;
-            int right = 2 * index + 2;
-            int largest = index;
-
-            if (left < size && heap[left]->getScore() > heap[largest]->getScore()) {
-                largest = left;
-            }
-
-            if (right < size && heap[right]->getScore() > heap[largest]->getScore()) {
-                largest = right;
-            }
-
-            if (largest == index) {
-                break;
-            }
-
-            Post* temp = heap[index];
-            heap[index] = heap[largest];
-            heap[largest] = temp;
-
-            index = largest;
-        }
-    }
-
-    void heapifyUp(int index) {
-        while (index > 0) {
-            int parent = (index - 1) / 2;
-
-            if (heap[index]->getScore() <= heap[parent]->getScore()) {
-                break;
-            }
-
-            Post* temp = heap[index];
-            heap[index] = heap[parent];
-            heap[parent] = temp;
-
-            index = parent;
-        }
-    }
+    void heapifyDown(int index) { /* TODO: LAB 3 */ }
+    void heapifyUp(int index) { /* TODO: LAB 3 */ }
 
 public:
     FeedHeap() : size(0) {}
-
-    void push(Post* p) {
-        if (size >= 1000) return;
-
-        heap[size] = p;
-        heapifyUp(size);
-        size++;
-    }
-
-    Post* popMax() {
-        if (size == 0) return nullptr;
-
-        Post* maxPost = heap[0];
-        heap[0] = heap[size - 1];
-        size--;
-
-        if (size > 0) {
-            heapifyDown(0);
-        }
-
-        return maxPost;
-    }
-
+    void push(Post* p) { /* TODO: LAB 3 */ }
+    Post* popMax() { return nullptr; /* TODO: LAB 3 */ }
     bool isEmpty() { return size == 0; }
 };
 
@@ -374,62 +295,10 @@ void addFriendship(User* requester, User* target) {
     cout << "\n[SUCCESS] You are now friends with @" << target->username << endl;
 }
 
+// TODO: LAB 5 - Breadth First Search
 void recommendFriends(User* startUser) {
     cout << "\n[GRAPH ANALYSIS] Finding friends of friends..." << endl;
-
-    if (startUser == nullptr) {
-        cout << "No user selected." << endl;
-        return;
-    }
-
-    queue<User*> q;
-    set<int> visited;
-    set<int> directFriends;
-    set<int> recommended;
-
-    visited.insert(startUser->userId);
-
-    for (User* f : startUser->friends) {
-        if (f != nullptr) {
-            q.push(f);
-            visited.insert(f->userId);
-            directFriends.insert(f->userId);
-        }
-    }
-
-    bool found = false;
-
-    while (!q.empty()) {
-        User* current = q.front();
-        q.pop();
-
-        for (User* candidate : current->friends) {
-            if (candidate == nullptr) {
-                continue;
-            }
-
-            if (candidate->userId == startUser->userId) {
-                continue;
-            }
-
-            if (directFriends.count(candidate->userId)) {
-                continue;
-            }
-
-            if (recommended.count(candidate->userId)) {
-                continue;
-            }
-
-            cout << "  - " << candidate->username << endl;
-            recommended.insert(candidate->userId);
-            visited.insert(candidate->userId);
-            found = true;
-        }
-    }
-
-    if (!found) {
-        cout << "  No friend recommendations found." << endl;
-    }
+    // TODO: LAB 5
 }
 
 // ==========================================
