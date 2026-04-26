@@ -44,24 +44,19 @@ struct Post {
     Post(int pid, int uid, string txt, int lk, long time)
         : postId(pid), userId(uid), content(txt), likes(lk), timestamp(time), next(nullptr) {}
 
-    // TODO: LAB 3 - Implement Scoring Logic
     double getScore() {
-    long currentTime = time(nullptr);
-    double hoursOld = difftime(currentTime, timestamp) / 3600.0;
-    return (likes * 10) + (1000.0 / (hoursOld + 1));
-}
-
+        long currentTime = time(nullptr);
+        double hoursOld = difftime(currentTime, timestamp) / 3600.0;
+        return (likes * 10) + (1000.0 / (hoursOld + 1));
+    }
 };
 
-// TODO: LAB 1 - Linked List
 class Timeline {
 public:
     Post* head;
     Timeline() : head(nullptr) {}
 
-    // Task: Add a new post to the FRONT of the list (O(1))
     void addPost(int pid, int uid, string content, int likes, long time) {
-        // LAB 1: O(1) push-front into singly linked list
         Post* newPost = new Post(pid, uid, content, likes, time);
         newPost->next = head;
         head = newPost;
@@ -74,7 +69,6 @@ public:
             return;
         }
 
-        // LAB 1: Traverse and print newest->oldest
         while (current != nullptr) {
             cout << "  > [ID: " << current->postId << "] "
                  << current->content
@@ -84,12 +78,13 @@ public:
     }
 };
 
-// Forward Declaration
-
-// Forward Declaration (needed because HashNode stores User*)
+// Forward declaration
 class User;
 
-// TODO: LAB 2 - Hash Map
+// ==========================================
+// LAB 2 HASH MAP
+// ==========================================
+
 struct HashNode {
     string key;
     User* value;
@@ -125,8 +120,6 @@ public:
             return;
         }
 
-
-
         HashNode* curr = table[idx];
         while (curr != nullptr) {
             if (curr->key == key) {
@@ -153,10 +146,10 @@ public:
     }
 };
 
-// Forward Declaration
-class User;
+// ==========================================
+// LAB 4 BST
+// ==========================================
 
-// TODO: LAB 4 - Binary Search Tree
 struct BSTNode {
     User* user;
     BSTNode* left;
@@ -180,16 +173,15 @@ public:
     }
 };
 
-
 class User {
 public:
     int userId;
     string username;
     int techScore, artScore, sportScore;
 
-    Timeline timeline;       // Lab 1
-    vector<User*> friends;   // Graph
-    FriendBST friendTree;    // Lab 4
+    Timeline timeline;
+    vector<User*> friends;
+    FriendBST friendTree;
 
     User(int id, string name, int t, int a, int s)
         : userId(id), username(name), techScore(t), artScore(a), sportScore(s) {}
@@ -206,7 +198,7 @@ public:
     vector<User*> getFriendsList() { return friends; }
 };
 
-// BST Implementation
+// BST implementation
 BSTNode* FriendBST::insert(BSTNode* node, User* u) {
     if (node == nullptr) {
         return new BSTNode(u);
@@ -214,7 +206,8 @@ BSTNode* FriendBST::insert(BSTNode* node, User* u) {
 
     if (u->username < node->user->username) {
         node->left = insert(node->left, u);
-    } else if (u->username > node->user->username) {
+    }
+    else if (u->username > node->user->username) {
         node->right = insert(node->right, u);
     }
 
@@ -231,7 +224,10 @@ void FriendBST::printInOrder(BSTNode* node) {
     printInOrder(node->right);
 }
 
-// TODO: LAB 3 - Max Heap
+// ==========================================
+// LAB 3 MAX HEAP
+// ==========================================
+
 class FeedHeap {
 private:
     Post* heap[1000];
@@ -307,10 +303,13 @@ public:
     bool isEmpty() { return size == 0; }
 };
 
+// ==========================================
+// GLOBAL DATA
+// ==========================================
+
 vector<User*> allUsers;
-
-
 UserMap userMap;
+int GLOBAL_POST_ID_COUNTER = 1;
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -323,24 +322,22 @@ vector<string> split(string s) {
 
     for (char c : s) {
         if (c == '"') {
-            inQuotes = !inQuotes; // Toggle quote state
-            continue;             // Skip the quote character itself
+            inQuotes = !inQuotes;
+            continue;
         }
 
         if (c == ',' && !inQuotes) {
-            // Found a delimiter outside of quotes -> New Token
             tokens.push_back(token);
             token.clear();
-        } else {
-            // Regular character or comma inside quotes
+        }
+        else {
             token += c;
         }
     }
-    tokens.push_back(token); // Add last token
+
+    tokens.push_back(token);
     return tokens;
 }
-
-int GLOBAL_POST_ID_COUNTER = 1;
 
 Post* findPostById(int id) {
     for (User* u : allUsers) {
@@ -404,21 +401,10 @@ void recommendFriends(User* startUser) {
         q.pop();
 
         for (User* candidate : current->friends) {
-            if (candidate == nullptr) {
-                continue;
-            }
-
-            if (candidate->userId == startUser->userId) {
-                continue;
-            }
-
-            if (directFriends.count(candidate->userId)) {
-                continue;
-            }
-
-            if (recommended.count(candidate->userId)) {
-                continue;
-            }
+            if (candidate == nullptr) continue;
+            if (candidate->userId == startUser->userId) continue;
+            if (directFriends.count(candidate->userId)) continue;
+            if (recommended.count(candidate->userId)) continue;
 
             cout << "  - " << candidate->username << endl;
             recommended.insert(candidate->userId);
@@ -430,6 +416,57 @@ void recommendFriends(User* startUser) {
     if (!found) {
         cout << "  No friend recommendations found." << endl;
     }
+}
+
+// ==========================================
+// LAB 6: MUTUAL FRIENDS
+// ==========================================
+
+// Kadon: fill this function with the hash-based mutual-friends logic.
+// Expected behavior:
+// - compare currentUser and targetUser friend lists
+// - use hashing for efficient lookup
+// - return all mutual friends in a vector<User*>
+vector<User*> getMutualFriends(User* currentUser, User* targetUser) {
+    vector<User*> mutuals;
+
+    // =========================
+    // KADON CODE STARTS HERE
+    // =========================
+
+    // Example goal:
+    // 1. Put one user's friends into a hash-based structure
+    // 2. Scan the other user's friends
+    // 3. If a friend appears in both, push_back into mutuals
+
+    // =======================
+    // KADON CODE ENDS HERE
+    // =======================
+
+    return mutuals;
+}
+
+// Shelby: sorting + printing layer
+void displayMutualFriends(User* currentUser, User* targetUser) {
+    vector<User*> mutuals = getMutualFriends(currentUser, targetUser);
+
+    sort(mutuals.begin(), mutuals.end(), [](User* a, User* b) {
+        return a->username < b->username;
+    });
+
+    if (mutuals.empty()) {
+        cout << "No mutual friends found." << endl;
+        return;
+    }
+
+    cout << "Mutual friends between @" << currentUser->username
+         << " and @" << targetUser->username << ":" << endl;
+
+    for (User* u : mutuals) {
+        cout << "  - " << u->username << endl;
+    }
+
+    cout << "Total mutual friends: " << mutuals.size() << endl;
 }
 
 // ==========================================
@@ -447,7 +484,15 @@ void loadData() {
         while (getline(userFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 5) continue;
-            User* newUser = new User(stoi(row[0]), row[1], stoi(row[2]), stoi(row[3]), stoi(row[4]));
+
+            User* newUser = new User(
+                stoi(row[0]),
+                row[1],
+                stoi(row[2]),
+                stoi(row[3]),
+                stoi(row[4])
+            );
+
             allUsers.push_back(newUser);
             userMap.put(row[1], newUser);
         }
@@ -460,8 +505,10 @@ void loadData() {
         while (getline(relFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 2) continue;
+
             int u1 = stoi(row[0]);
             int u2 = stoi(row[1]);
+
             if (u1 <= (int)allUsers.size() && u2 <= (int)allUsers.size()) {
                 allUsers[u1 - 1]->addFriend(allUsers[u2 - 1]);
                 allUsers[u2 - 1]->addFriend(allUsers[u1 - 1]);
@@ -476,8 +523,10 @@ void loadData() {
         while (getline(postFile, line)) {
             vector<string> row = split(line);
             if (row.size() < 5) continue;
+
             int pid = stoi(row[0]);
             int uid = stoi(row[1]);
+
             if (uid <= (int)allUsers.size()) {
                 allUsers[uid - 1]->addPost(pid, row[2], stoi(row[3]), stol(row[4]));
                 if (pid >= GLOBAL_POST_ID_COUNTER) GLOBAL_POST_ID_COUNTER = pid + 1;
@@ -488,7 +537,6 @@ void loadData() {
 }
 
 void saveData() {
-    // SAFETY CHECK: If no users exist, do not overwrite files!
     if (allUsers.empty()) {
         cout << "[SAFETY] No data in memory. Skipping save to prevent file wipe." << endl;
         return;
@@ -508,7 +556,9 @@ void saveData() {
     relFile << "user_id_1,user_id_2\n";
     for (User* u : allUsers) {
         for (User* f : u->friends) {
-            if (u->userId < f->userId) relFile << u->userId << "," << f->userId << "\n";
+            if (u->userId < f->userId) {
+                relFile << u->userId << "," << f->userId << "\n";
+            }
         }
     }
     relFile.close();
@@ -518,7 +568,11 @@ void saveData() {
     for (User* u : allUsers) {
         vector<Post*> temp;
         Post* curr = u->timeline.head;
-        while (curr) { temp.push_back(curr); curr = curr->next; }
+
+        while (curr) {
+            temp.push_back(curr);
+            curr = curr->next;
+        }
 
         for (int i = (int)temp.size() - 1; i >= 0; i--) {
             Post* p = temp[i];
@@ -526,6 +580,7 @@ void saveData() {
             if (safeContent.find(',') != string::npos) {
                 safeContent = "\"" + safeContent + "\"";
             }
+
             postFile << p->postId << "," << p->userId << ","
                      << safeContent << "," << p->likes << "," << p->timestamp << "\n";
         }
@@ -547,9 +602,19 @@ void clearScreen() {
 #endif
 }
 
+int readInt() {
+    int x;
+    while (!(cin >> x)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Enter a number: ";
+    }
+    return x;
+}
+
 void showUserDashboard(User* currentUser) {
     int choice = 0;
-    while (choice != 7) {
+    while (choice != 8) {
         cout << "\n--- Welcome, @" << currentUser->username << " ---" << endl;
         cout << "1. View My Post (Lab 1)" << endl;
         cout << "2. Create New Post (Lab 1)" << endl;
@@ -557,8 +622,10 @@ void showUserDashboard(User* currentUser) {
         cout << "4. Algorithmic Feed (Lab 3)" << endl;
         cout << "5. View Friends Sorted (Lab 4)" << endl;
         cout << "6. Get Friend Recommendations (Lab 5)" << endl;
-        cout << "7. Logout" << endl;
+        cout << "7. Mutual Friends (Lab 6)" << endl;
+        cout << "8. Logout" << endl;
         cout << "Select >> ";
+
         cin >> choice;
 
         if (choice == 1) {
@@ -574,15 +641,22 @@ void showUserDashboard(User* currentUser) {
         }
         else if (choice == 3) {
             string friendName;
-            cout << "Enter username to add: "; cin >> friendName;
+            cout << "Enter username to add: ";
+            cin >> friendName;
+
             User* target = userMap.get(friendName);
-            if (target && target != currentUser) addFriendship(currentUser, target);
-            else cout << "Invalid user (or Hash Map not implemented)." << endl;
+            if (target && target != currentUser) {
+                addFriendship(currentUser, target);
+            }
+            else {
+                cout << "Invalid user (or Hash Map not implemented)." << endl;
+            }
         }
         else if (choice == 4) {
             cout << "\n[ALGORITHMIC FEED]" << endl;
             FeedHeap feed;
             vector<User*> friends = currentUser->getFriendsList();
+
             for (User* f : friends) {
                 Post* p = f->timeline.head;
                 int limit = 0;
@@ -592,23 +666,35 @@ void showUserDashboard(User* currentUser) {
                     limit++;
                 }
             }
+
             int count = 0;
             while (!feed.isEmpty() && count < 10) {
                 Post* top = feed.popMax();
-                if (top)
+                if (top) {
                     cout << "  > [ID: " << top->postId << "] [Score: " << (int)top->getScore() << "] @"
                          << allUsers[top->userId - 1]->username << ": " << top->content
                          << " (" << top->likes << " likes)" << endl;
+                }
                 count++;
             }
-            if (count == 0) cout << "  No posts found." << endl;
+
+            if (count == 0) {
+                cout << "  No posts found." << endl;
+            }
             else {
                 cout << "\nDo you want to like a post? (y/n): ";
-                char resp; cin >> resp;
+                char resp;
+                cin >> resp;
+
                 if (resp == 'y' || resp == 'Y') {
-                    int pid; cout << "Enter Post ID: "; cin >> pid;
+                    int pid;
+                    cout << "Enter Post ID: ";
+                    cin >> pid;
                     Post* p = findPostById(pid);
-                    if (p) { p->likes++; cout << "Liked!" << endl; }
+                    if (p) {
+                        p->likes++;
+                        cout << "Liked!" << endl;
+                    }
                 }
             }
         }
@@ -620,21 +706,31 @@ void showUserDashboard(User* currentUser) {
             recommendFriends(currentUser);
         }
         else if (choice == 7) {
+            string otherUsername;
+            cout << "\n[MUTUAL FRIENDS]" << endl;
+            cout << "Enter username to compare with: ";
+            cin >> otherUsername;
+
+            User* targetUser = userMap.get(otherUsername);
+
+            if (!targetUser) {
+                cout << "User not found." << endl;
+            }
+            else if (targetUser == currentUser) {
+                cout << "Cannot compare with yourself." << endl;
+            }
+            else {
+                displayMutualFriends(currentUser, targetUser);
+            }
+        }
+        else if (choice == 8) {
             cout << "Logging out..." << endl;
+        }
+        else {
+            cout << "Invalid choice. Pick 1-8." << endl;
         }
     }
 }
-
-int readInt() {
-    int x;
-    while (!(cin >> x)) {
-        cin.clear(); // clear fail flag
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard bad input
-        cout << "Invalid input. Enter a number: ";
-    }
-    return x;
-}
-
 
 void showMainMenu() {
     int choice = 0;
@@ -671,8 +767,6 @@ void showMainMenu() {
             registerNewUser(username, t, a, s);
         }
         else if (choice == 3) {
-            // SAFETY: Commented out to prevent data loss on initial run.
-            // Students must uncomment this ONLY when Lab 1 is complete.
             // saveData();
             cout << "Goodbye! " << endl;
         }
@@ -682,11 +776,9 @@ void showMainMenu() {
     }
 }
 
-
 int main() {
     loadData();
     clearScreen();
     showMainMenu();
     return 0;
 }
-
