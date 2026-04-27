@@ -423,10 +423,7 @@ void recommendFriends(User* startUser) {
 // ==========================================
 
 // Kadon: fill this function with the hash-based mutual-friends logic.
-// Expected behavior:
-// - compare currentUser and targetUser friend lists
-// - use hashing for efficient lookup
-// - return all mutual friends in a vector<User*>
+
 vector<User*> getMutualFriends(User* currentUser, User* targetUser) {
     vector<User*> mutuals;
 
@@ -434,10 +431,7 @@ vector<User*> getMutualFriends(User* currentUser, User* targetUser) {
     // KADON CODE STARTS HERE
     // =========================
 
-    // Example goal:
-    // 1. Put one user's friends into a hash-based structure
-    // 2. Scan the other user's friends
-    // 3. If a friend appears in both, push_back into mutuals
+  
 
     // =======================
     // KADON CODE ENDS HERE
