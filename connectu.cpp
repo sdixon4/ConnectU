@@ -23,6 +23,7 @@
 #include <ctime>
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <queue>
 #include <algorithm>
 #include <limits>
@@ -431,7 +432,26 @@ vector<User*> getMutualFriends(User* currentUser, User* targetUser) {
     // KADON CODE STARTS HERE
     // =========================
 
-  
+    if (currentUser == nullptr || targetUser == nullptr) {
+        return mutuals;
+    }
+
+    unordered_set<int> currentFriendIds;
+    unordered_set<int> mutualFriendIds;
+
+    for (User* f : currentUser->friends) {
+        if (f != nullptr) {
+            currentFriendIds.insert(f->userId);
+        }
+    }
+
+    for (User* f : targetUser->friends) {
+        if (f != nullptr && currentFriendIds.count(f->userId) > 0
+            && mutualFriendIds.count(f->userId) == 0) {
+            mutuals.push_back(f);
+            mutualFriendIds.insert(f->userId);
+        }
+    }
 
     // =======================
     // KADON CODE ENDS HERE
@@ -439,7 +459,6 @@ vector<User*> getMutualFriends(User* currentUser, User* targetUser) {
 
     return mutuals;
 }
-
 // Shelby: sorting + printing layer
 void displayMutualFriends(User* currentUser, User* targetUser) {
     vector<User*> mutuals = getMutualFriends(currentUser, targetUser);
@@ -700,21 +719,30 @@ void showUserDashboard(User* currentUser) {
             recommendFriends(currentUser);
         }
         else if (choice == 7) {
-            string otherUsername;
             cout << "\n[MUTUAL FRIENDS]" << endl;
-            cout << "Enter username to compare with: ";
-            cin >> otherUsername;
 
-            User* targetUser = userMap.get(otherUsername);
+            vector<User*> friends = currentUser->getFriendsList();
 
-            if (!targetUser) {
-                cout << "User not found." << endl;
-            }
-            else if (targetUser == currentUser) {
-                cout << "Cannot compare with yourself." << endl;
+            if (friends.empty()) {
+                cout << "You have no friends to compare with." << endl;
             }
             else {
-                displayMutualFriends(currentUser, targetUser);
+                cout << "Choose a friend to compare with:" << endl;
+
+                for (int i = 0; i < (int)friends.size(); i++) {
+                    cout << "  " << (i + 1) << ". " << friends[i]->username << endl;
+                }
+
+                cout << "Select friend number >> ";
+                int friendChoice = readInt();
+
+                if (friendChoice < 1 || friendChoice > (int)friends.size()) {
+                    cout << "Invalid friend number." << endl;
+                }
+                else {
+                    User* targetUser = friends[friendChoice - 1];
+                    displayMutualFriends(currentUser, targetUser);
+                }
             }
         }
         else if (choice == 8) {
@@ -761,7 +789,7 @@ void showMainMenu() {
             registerNewUser(username, t, a, s);
         }
         else if (choice == 3) {
-            // saveData();
+            saveData();
             cout << "Goodbye! " << endl;
         }
         else {
@@ -776,3 +804,4 @@ int main() {
     showMainMenu();
     return 0;
 }
+
